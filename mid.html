@@ -99,7 +99,6 @@
     position: relative;
     overflow: hidden;
     transition: transform .15s, box-shadow .15s;
-    box-shadow: 0 0 30px #cc1a1a55, inset 0 1px 0 #ff444466;
   }
 
   .start-btn:hover { 
@@ -252,12 +251,10 @@
 <div id="chaos-layer"></div>
 
 <script>
-const MAX_SPIDERS = 280;           // ← очень много пауков
-const LIFETIME_MS = 18000;
+const MAX_SPIDERS = 450;           // ← ещё больше пауков
 const SPIDER_GIFS = ['spider1.gif','spider2.gif','spider3.gif','spider4.gif','spider5.gif'];
 
 let chaosActive = false;
-let chaosTimers = [];
 let spiderEls = [];
 
 // ── Sound ──────────────────────────────────────────────────────
@@ -265,9 +262,11 @@ function playBrudaSound() {
   const a = document.getElementById('bruda-sound');
   if (!a) return;
   
-  a.volume = 0.85;           // громче
+  a.volume = 0.6;           // ← уменьшил громкость
   a.currentTime = 0;
   a.play().catch(e => console.log("Audio error:", e));
+  
+  return a;
 }
 
 function stopBrudaSound() {
@@ -294,15 +293,15 @@ function goStart() {
 
 function pickHero(name) {
   if (name === 'Бруда') {
-    playBrudaSound();
-    startChaos();
+    const audio = playBrudaSound();
+    startChaos(audio);
   } else {
     showOnly('result-screen');
   }
 }
 
 // ── CHAOS ──────────────────────────────────────────────────────
-function startChaos() {
+function startChaos(audio) {
   chaosActive = true;
   
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -312,12 +311,15 @@ function startChaos() {
   spiderEls = [];
   layer.classList.add('active');
 
-  // Быстрый стартовый залп
-  for (let i = 0; i < 60; i++) {
-    setTimeout(() => spawnSpider(layer), i * 8);
+  // Длительность атаки = длительность звука
+  const attackDuration = audio.duration ? audio.duration * 1000 : 18000;
+
+  // Быстрый начальный залп
+  for (let i = 0; i < 80; i++) {
+    setTimeout(() => spawnSpider(layer), i * 6);
   }
 
-  const spawnInterval = 35; // очень часто
+  const spawnInterval = 28; // очень агрессивно
 
   function spawnLoop() {
     if (!chaosActive || spiderEls.length >= MAX_SPIDERS) return;
@@ -327,18 +329,20 @@ function startChaos() {
 
   spawnLoop();
 
-  // Перемешивание позиций
-  setInterval(() => {
+  // Перемешивание
+  const shuffleInterval = setInterval(() => {
     if (!chaosActive) return;
     randomisePositions();
-  }, 650);
+  }, 550);
 
-  // Завершение
-  setTimeout(endChaos, LIFETIME_MS);
+  // Завершаем вместе с окончанием звука
+  setTimeout(() => {
+    endChaos(shuffleInterval);
+  }, attackDuration);
 }
 
 function spawnSpider(layer) {
-  const size = 45 + Math.random() * 75; // чуть меньше, чтобы влезло больше
+  const size = 40 + Math.random() * 70;
   
   const el = document.createElement('div');
   el.className = 'spider';
@@ -361,25 +365,25 @@ function randomisePositions() {
   spiderEls = spiderEls.filter(el => el.isConnected);
   
   spiderEls.forEach(el => {
-    const w = parseFloat(el.style.width);
-    const h = parseFloat(el.style.height);
+    const w = parseFloat(el.style.width) || 60;
+    const h = parseFloat(el.style.height) || 60;
     el.style.left = Math.random() * (window.innerWidth - w) + 'px';
     el.style.top = Math.random() * (window.innerHeight - h) + 'px';
   });
 }
 
-function endChaos() {
+function endChaos(shuffleInterval) {
   chaosActive = false;
-  chaosTimers.forEach(clearTimeout);
+  clearInterval(shuffleInterval);
   
   stopBrudaSound();
   
   spiderEls.forEach((el, i) => {
     setTimeout(() => {
-      el.style.transition = 'transform .4s, opacity .4s';
+      el.style.transition = 'transform .45s, opacity .45s';
       el.style.transform = 'scale(0) rotate(720deg)';
       el.style.opacity = '0';
-    }, i * 12);
+    }, i * 10);
   });
 
   setTimeout(() => {
@@ -388,7 +392,7 @@ function endChaos() {
     layer.classList.remove('active');
     spiderEls = [];
     goStart();
-  }, 2200);
+  }, 2500);
 }
 </script>
 </body>
