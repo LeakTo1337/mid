@@ -3,27 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Тест на мидость</title>
+<title>Мидость</title>
+
+<!-- Google Identity Services — настоящая кнопка "Войти через Google".
+     Чтобы она заработала, впишите свой Client ID в GOOGLE_CLIENT_ID внизу скрипта. -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;700&display=swap');
-  
-  *, *::before, *::after { 
-    box-sizing: border-box; 
-    margin: 0; 
-    padding: 0; 
-  }
-  
+  @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;500;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
   :root {
     --red: #cc1a1a;
     --red-hot: #ff2b2b;
     --dim: #1c1c28;
+    --dim2: #14141e;
     --text: #e8e2d0;
     --muted: #7a7065;
+    --ok: #6bcc6b;
   }
-  
+
   html, body {
-    width: 100%; 
-    height: 100%;
+    width: 100%; height: 100%;
     background-color: #0a0a0f;
     background-image:
       linear-gradient(#1a1a2a 1px, transparent 1px),
@@ -37,197 +39,258 @@
 
   .screen {
     display: none;
-    position: fixed; 
-    inset: 0;
+    position: fixed; inset: 0;
     flex-direction: column;
-    align-items: center; 
-    justify-content: center;
+    align-items: center; justify-content: center;
     gap: 2rem;
   }
-  
-  .screen.active {
-    display: flex;
-  }
+  .screen.active { display: flex; }
 
-  /* ── LOGO ── */
-  .logo {
+  /* ───────── START / LANDING ───────── */
+  #start-screen { gap: 2.2rem; transition: opacity .5s ease, transform .5s ease; }
+  #start-screen.leaving { opacity: 0; transform: scale(1.08); }
+
+  .hero-pic-wrap {
+    width: min(60vw, 380px);
+    aspect-ratio: 1 / 1;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 0 40px #ff000044, 0 0 120px #ff000022;
+    border: 2px solid #ff2b2b33;
+    background: var(--dim);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hero-pic-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* показывается только если pic1.png не найден рядом с сайтом */
+  .hero-pic-fallback {
     font-family: 'Creepster', cursive;
-    font-size: clamp(4rem, 14vw, 9rem);
     color: var(--red-hot);
-    text-shadow:
-      0 0 20px #ff000088,
-      0 0 60px #ff000033,
-      0 2px 0 #6b0000,
-      0 4px 0 #3a0000;
-    letter-spacing: .06em;
-    line-height: 1;
-    animation: flicker 4s infinite;
+    font-size: 3.2rem;
+    text-align: center;
+    padding: 1rem;
+    text-shadow: 0 0 20px #ff000088;
   }
 
-  @keyframes flicker {
-    0%,100% { opacity:1; }
-    92% { opacity:1; }
-    93% { opacity:.6; }
-    94% { opacity:1; }
-    97% { opacity:1; }
-    98% { opacity:.4; }
-    99% { opacity:1; }
-  }
-
-  .tagline {
-    font-size: 1.1rem;
-    letter-spacing: .35em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-top: -.8rem;
-  }
-
-  /* START BTN */
-  .start-btn {
-    margin-top: 1rem;
+  .enter-btn {
     padding: .9rem 3.5rem;
     font-family: 'Oswald', sans-serif;
-    font-size: 1.4rem;
-    font-weight: 700;
-    letter-spacing: .2em;
-    text-transform: uppercase;
+    font-size: 1.3rem; font-weight: 700;
+    letter-spacing: .2em; text-transform: uppercase;
     color: #fff;
     background: linear-gradient(135deg, #6b0000 0%, #cc1a1a 50%, #6b0000 100%);
     border: 2px solid #ff2b2b55;
     border-radius: 4px;
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
     transition: transform .15s, box-shadow .15s;
   }
+  .enter-btn:hover { transform: scale(1.04); box-shadow: 0 0 50px #ff2b2b88; }
+  .enter-btn:active { transform: scale(.97); }
 
-  .start-btn:hover { 
-    transform: scale(1.04); 
-    box-shadow: 0 0 50px #ff2b2b88; 
+  /* ───────── HUB ───────── */
+  #hub-screen { justify-content: flex-start; padding-top: 5rem; gap: 2.5rem; }
+
+  .hub-header {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 4.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 1.5rem;
+    background: linear-gradient(#0a0a0fee, #0a0a0f00);
+  }
+  .hub-logo {
+    font-family: 'Creepster', cursive;
+    font-size: 1.8rem; color: var(--red-hot);
+    text-shadow: 0 0 12px #ff000066;
+    letter-spacing: .05em; cursor: pointer;
   }
 
-  /* QUESTION */
-  #question-screen { gap: 1.5rem; }
-  
-  .q-text {
-    font-size: clamp(1.2rem, 3.5vw, 2rem);
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-align: center;
-    color: var(--text);
-    padding: 0 1rem;
-  }
+  .hub-title { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; letter-spacing: .1em; text-align: center; color: var(--muted); text-transform: uppercase; }
 
-  .heroes {
+  .games-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: .8rem;
-    width: min(420px, 90vw);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.2rem;
+    width: min(680px, 92vw);
   }
 
-  .hero-btn {
-    padding: .85rem 1rem;
-    font-family: 'Oswald', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 700;
-    letter-spacing: .15em;
-    text-transform: uppercase;
-    color: var(--text);
+  .game-card {
     background: var(--dim);
     border: 1px solid #ffffff18;
-    border-radius: 4px;
+    border-radius: 10px;
+    padding: 1.6rem 1rem;
+    display: flex; flex-direction: column; align-items: center; gap: .6rem;
     cursor: pointer;
+    transition: all .18s;
+  }
+  .game-card:not(.locked):hover {
+    border-color: var(--red);
+    box-shadow: 0 0 24px #cc1a1a55;
+    transform: translateY(-3px);
+  }
+  .game-card-icon { font-size: 2.2rem; }
+  .game-card-title { font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+  .game-card-desc { font-size: .8rem; color: var(--muted); text-align: center; }
+  .game-card.locked { opacity: .45; cursor: default; filter: grayscale(1); }
+
+  /* ───────── PROFILE WIDGET ───────── */
+  .profile-widget { position: relative; }
+  .avatar-btn {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--dim2);
+    border: 2px solid #ffffff22;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    font-size: 1.2rem;
+    transition: border-color .15s;
+  }
+  .avatar-btn:hover { border-color: var(--red); }
+  .avatar-btn img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* ───────── MODAL (profile) ───────── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 500;
+    background: #000000aa;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    width: min(420px, 92vw);
+    max-height: 86vh;
+    overflow-y: auto;
+    background: var(--dim2);
+    border: 1px solid #ffffff22;
+    border-radius: 12px;
+    padding: 1.6rem;
+    display: flex; flex-direction: column; gap: 1.1rem;
+  }
+  .modal h2 {
+    font-family: 'Creepster', cursive;
+    color: var(--red-hot);
+    font-size: 1.6rem; letter-spacing: .04em;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-close { cursor: pointer; color: var(--muted); font-size: 1.4rem; background:none; border:none; }
+  .modal-close:hover { color: var(--text); }
+
+  .profile-row { display: flex; align-items: center; gap: 1rem; }
+  .profile-avatar-big {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--dim); border: 2px solid #ffffff22;
+    overflow: hidden; display:flex; align-items:center; justify-content:center; font-size:1.6rem;
+    flex-shrink: 0;
+  }
+  .profile-avatar-big img { width:100%; height:100%; object-fit:cover; }
+
+  .field-label { font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: .3rem; display:block; }
+  .field-input {
+    width: 100%; padding: .55rem .7rem;
+    background: var(--dim); border: 1px solid #ffffff22; border-radius: 6px;
+    color: var(--text); font-family: 'Oswald', sans-serif; font-size: .95rem;
+  }
+  .field-input:focus { outline: none; border-color: var(--red); }
+
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+  .stat-box { background: var(--dim); border: 1px solid #ffffff18; border-radius: 8px; padding: .8rem; text-align: center; }
+  .stat-num { font-size: 1.5rem; font-weight: 700; color: var(--ok); }
+  .stat-label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+
+  .btn {
+    padding: .6rem 1.2rem; border-radius: 6px; border: 1px solid #ffffff22;
+    background: var(--dim); color: var(--text); font-family: 'Oswald', sans-serif;
+    font-size: .9rem; letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
     transition: all .15s;
   }
+  .btn:hover { border-color: var(--red); box-shadow: 0 0 14px #cc1a1a44; }
+  .btn.primary { background: linear-gradient(135deg, #6b0000, #cc1a1a); border-color: #ff2b2b55; color:#fff; }
+  .btn.ghost { background: transparent; }
+  .btn-row { display: flex; gap: .6rem; flex-wrap: wrap; }
 
-  .hero-btn:hover {
-    background: #2a1a1a;
-    border-color: var(--red);
-    box-shadow: 0 0 18px #cc1a1a55;
-    transform: translateY(-2px);
+  details.settings { background: var(--dim); border: 1px solid #ffffff18; border-radius: 8px; padding: .7rem .9rem; }
+  details.settings summary { cursor: pointer; font-size: .85rem; letter-spacing: .06em; color: var(--muted); text-transform: uppercase; }
+  .warn { font-size: .74rem; color: #ff9d6b; line-height: 1.4; margin-top: .5rem; }
+  .settings-fields { display: flex; flex-direction: column; gap: .6rem; margin-top: .7rem; }
+
+  #g_signin_btn { display: flex; justify-content: center; }
+
+  /* ───────── QUESTION / RESULT (Мидость) ───────── */
+  #question-screen, #result-screen { gap: 1.5rem; }
+  .back-btn {
+    position: fixed; top: 1.2rem; left: 1.2rem;
+    background: transparent; border: 1px solid #ffffff22; color: var(--muted);
+    padding: .4rem .9rem; border-radius: 6px; cursor: pointer; font-family:'Oswald',sans-serif;
+    letter-spacing: .08em; font-size: .8rem; text-transform: uppercase;
   }
+  .back-btn:hover { color: var(--text); border-color: var(--red); }
 
-  /* RESULT */
+  .q-text { font-size: clamp(1.2rem, 3.5vw, 2rem); font-weight: 700; letter-spacing: .08em; text-align: center; color: var(--text); padding: 0 1rem; }
+  .heroes { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; width: min(420px, 90vw); }
+  .hero-btn {
+    padding: .85rem 1rem; font-family: 'Oswald', sans-serif; font-size: 1.2rem; font-weight: 700;
+    letter-spacing: .15em; text-transform: uppercase; color: var(--text);
+    background: var(--dim); border: 1px solid #ffffff18; border-radius: 4px; cursor: pointer; transition: all .15s;
+  }
+  .hero-btn:hover { background: #2a1a1a; border-color: var(--red); box-shadow: 0 0 18px #cc1a1a55; transform: translateY(-2px); }
+
   #result-screen { gap: 1.8rem; }
-  
-  .result-title {
-    font-family: 'Creepster', cursive;
-    font-size: clamp(2rem, 8vw, 4.5rem);
-    color: #6bcc6b;
-    text-shadow: 0 0 20px #00ff0066;
-    text-align: center;
-  }
+  .result-title { font-family: 'Creepster', cursive; font-size: clamp(2rem, 8vw, 4.5rem); color: var(--ok); text-shadow: 0 0 20px #00ff0066; text-align: center; }
+  .result-btn { padding: .7rem 2.5rem; font-family: 'Oswald', sans-serif; font-size: 1.1rem; letter-spacing: .2em; text-transform: uppercase; color: #fff; background: #1a2a1a; border: 1px solid #6bcc6b55; border-radius: 4px; cursor: pointer; }
+  .result-btn:hover { background: #2a4a2a; box-shadow: 0 0 20px #00ff0044; }
 
-  .result-btn {
-    padding: .7rem 2.5rem;
-    font-family: 'Oswald', sans-serif;
-    font-size: 1.1rem;
-    letter-spacing: .2em;
-    text-transform: uppercase;
-    color: #fff;
-    background: #1a2a1a;
-    border: 1px solid #6bcc6b55;
-    border-radius: 4px;
-    cursor: pointer;
-  }
+  /* ───────── SPIDER CHAOS ───────── */
+  #chaos-layer { position: fixed; inset: 0; pointer-events: none; z-index: 999; display: none; overflow: hidden; }
+  #chaos-layer.active { display: block; }
+  .spider { position: absolute; pointer-events: none; line-height: 1; animation: spiderDrop .4s cubic-bezier(.22,1,.36,1) both; will-change: left, top, transform; }
+  .spider img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  @keyframes spiderDrop { from { opacity:0; transform: scale(0.3) rotate(-40deg); } to { opacity:1; transform: scale(1) rotate(0deg); } }
 
-  .result-btn:hover { 
-    background: #2a4a2a; 
-    box-shadow: 0 0 20px #00ff0044; 
-  }
-
-  /* ── SPIDER CHAOS ── */
-  #chaos-layer {
-    position: fixed; 
-    inset: 0;
-    pointer-events: none;
-    z-index: 999;
-    display: none;
-    overflow: hidden;
-  }
-  
-  #chaos-layer.active { 
-    display: block; 
-  }
-
-  .spider {
-    position: absolute;
-    pointer-events: none;
-    line-height: 1;
-    animation: spiderDrop .4s cubic-bezier(.22,1,.36,1) both;
-    will-change: left, top, transform;
-  }
-
-  .spider img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-
-  @keyframes spiderDrop {
-    from { 
-      opacity:0; 
-      transform: scale(0.3) rotate(-40deg); 
-    }
-    to { 
-      opacity:1; 
-      transform: scale(1) rotate(0deg); 
-    }
+  @media (max-width: 480px) {
+    .stats-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
 
-<!-- START -->
+<!-- ═══════════ START / LANDING ═══════════ -->
 <div id="start-screen" class="screen active">
-  <div class="logo">МИДОСТЬ</div>
-  <div class="tagline">тест на мид™</div>
-  <button class="start-btn" onclick="showQuestion()">▶ НАЧАТЬ ТЕСТ</button>
+  <div class="hero-pic-wrap" id="hero-pic-wrap">
+    <img id="hero-pic" src="pic1.png" alt="Мидость"
+         onerror="document.getElementById('hero-pic-wrap').innerHTML='<div class=&quot;hero-pic-fallback&quot;>МИДОСТЬ<br><span style=&quot;font-family:Oswald;font-size:.9rem;color:#7a7065;letter-spacing:.05em;text-transform:none&quot;>положите файл pic1.png (1254×1254) рядом с index.html</span></div>'">
+  </div>
+  <button class="enter-btn" onclick="enterSite()">▶ ВОЙТИ</button>
 </div>
 
-<!-- QUESTION -->
+<!-- ═══════════ HUB (мини-режимы) ═══════════ -->
+<div id="hub-screen" class="screen">
+  <header class="hub-header">
+    <div class="hub-logo" onclick="goHub()">МИДОСТЬ</div>
+    <div class="profile-widget">
+      <button class="avatar-btn" id="avatar-btn" onclick="openProfile()">👤</button>
+    </div>
+  </header>
+  <div class="hub-title">выбери режим</div>
+  <div class="games-grid">
+    <div class="game-card" onclick="openGame('midost')">
+      <div class="game-card-icon">🕷️</div>
+      <div class="game-card-title">Мидость</div>
+      <div class="game-card-desc">тест на мид™</div>
+    </div>
+    <div class="game-card locked">
+      <div class="game-card-icon">🔒</div>
+      <div class="game-card-title">Скоро</div>
+      <div class="game-card-desc">новый режим в разработке</div>
+    </div>
+    <div class="game-card locked">
+      <div class="game-card-icon">🔒</div>
+      <div class="game-card-title">Скоро</div>
+      <div class="game-card-desc">новый режим в разработке</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ Мидость: QUESTION ═══════════ -->
 <div id="question-screen" class="screen">
+  <button class="back-btn" onclick="goHub()">← В МЕНЮ</button>
   <div class="q-text">Кого вы бы пикнули на мид?</div>
   <div class="heroes">
     <button class="hero-btn" onclick="pickHero('Кез')">КЕЗ</button>
@@ -237,11 +300,89 @@
   </div>
 </div>
 
-<!-- RESULT -->
+<!-- ═══════════ Мидость: RESULT ═══════════ -->
 <div id="result-screen" class="screen">
+  <button class="back-btn" onclick="goHub()">← В МЕНЮ</button>
   <div class="result-title">✅ ТЕСТ ПРОЙДЕН</div>
   <div class="result-sub">Ты определённо не еблан</div>
-  <button class="result-btn" onclick="goStart()">↩ СНОВА</button>
+  <button class="result-btn" onclick="goHub()">↩ В МЕНЮ</button>
+</div>
+
+<!-- ═══════════ PROFILE MODAL ═══════════ -->
+<div class="modal-overlay" id="profile-modal">
+  <div class="modal">
+    <h2>Профиль <button class="modal-close" onclick="closeProfile()">✕</button></h2>
+
+    <!-- Гость: предложение войти -->
+    <div id="profile-guest">
+      <p style="color:var(--muted); font-size:.9rem; line-height:1.5; margin-bottom:1rem;">
+        Войдите через Google, чтобы сохранять аватар, имя и статистику игр.
+      </p>
+      <div id="g_signin_btn"></div>
+      <p class="warn">Кнопка входа появится, если в коде указан свой Google Client ID (см. переменную <code>GOOGLE_CLIENT_ID</code>). Без него вход работает в демо-режиме — нажмите ниже.</p>
+      <div class="btn-row" style="margin-top:.6rem;">
+        <button class="btn" onclick="demoLogin()">Демо-вход (без Google)</button>
+      </div>
+    </div>
+
+    <!-- Авторизован -->
+    <div id="profile-user" style="display:none; flex-direction:column; gap:1.1rem;">
+      <div class="profile-row">
+        <div class="profile-avatar-big" id="profile-avatar-big">👤</div>
+        <div style="flex:1;">
+          <label class="field-label">Имя</label>
+          <input class="field-input" id="name-input" placeholder="Твоё имя" oninput="onNameInput()">
+        </div>
+      </div>
+
+      <div>
+        <label class="field-label">Аватар</label>
+        <input type="file" accept="image/*" class="field-input" id="avatar-input" onchange="onAvatarChange(event)">
+      </div>
+
+      <div>
+        <label class="field-label">О себе</label>
+        <input class="field-input" id="info-input" placeholder="Пара слов о себе" oninput="onInfoInput()">
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-num" id="stat-games">0</div>
+          <div class="stat-label">игр пройдено</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="stat-time">00:00</div>
+          <div class="stat-label">время на сайте</div>
+        </div>
+      </div>
+
+      <details class="settings">
+        <summary>Синхронизация с GitHub</summary>
+        <div class="settings-fields">
+          <div>
+            <label class="field-label">owner/repo</label>
+            <input class="field-input" id="gh-repo" placeholder="username/my-site-repo">
+          </div>
+          <div>
+            <label class="field-label">Personal Access Token</label>
+            <input class="field-input" id="gh-token" type="password" placeholder="github_pat_...">
+          </div>
+          <p class="warn">
+            Токен хранится только в памяти вкладки (не сохраняется и никуда не отправляется, кроме api.github.com).
+            Но т.к. запрос идёт напрямую из браузера, любой, кто откроет консоль разработчика на этой странице
+            в момент сохранения, теоретически может его увидеть. Для публичного сайта надёжнее делать запись через
+            маленький серверный прокси (Cloudflare Worker / Netlify Function), а не хранить токен в браузере.
+          </p>
+          <button class="btn" onclick="saveProfileToGithub()">Сохранить в GitHub</button>
+          <div id="gh-status" style="font-size:.8rem; color:var(--muted);"></div>
+        </div>
+      </details>
+
+      <div class="btn-row">
+        <button class="btn ghost" onclick="logout()">Выйти</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- SOUND -->
@@ -251,44 +392,247 @@
 <div id="chaos-layer"></div>
 
 <script>
-const MAX_SPIDERS = 1000;           // ← ещё больше пауков
-const SPIDER_GIFS = ['spider1.gif','spider2.gif','spider3.gif','spider4.gif','spider5.gif'];
-
-let chaosActive = false;
-let spiderEls = [];
-
-// ── Sound ──────────────────────────────────────────────────────
-function playBrudaSound() {
-  const a = document.getElementById('bruda-sound');
-  if (!a) return;
-  
-  a.volume = 0.6;           // ← уменьшил громкость
-  a.currentTime = 0;
-  a.play().catch(e => console.log("Audio error:", e));
-  
-  return a;
-}
-
-function stopBrudaSound() {
-  const a = document.getElementById('bruda-sound');
-  if (a) {
-    a.pause();
-    a.currentTime = 0;
+/* ════════════════════════════════════════════════════════════
+   ХРАНИЛИЩЕ (с безопасным фолбэком на память, чтобы всегда
+   работало даже там, где localStorage недоступен)
+   ════════════════════════════════════════════════════════════ */
+const memStore = {};
+function storeGet(key, fallback) {
+  try {
+    const v = localStorage.getItem(key);
+    return v !== null ? JSON.parse(v) : fallback;
+  } catch (e) {
+    return key in memStore ? memStore[key] : fallback;
   }
 }
+function storeSet(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); }
+  catch (e) { memStore[key] = value; }
+}
 
-// ── Navigation ─────────────────────────────────────────────────
+/* ════════════════════════════════════════════════════════════
+   СОСТОЯНИЕ
+   ════════════════════════════════════════════════════════════ */
+let user = storeGet('midost_user', null);       // {name, email, avatar, info}
+let stats = storeGet('midost_stats', { gamesPlayed: 0, secondsOnSite: 0 });
+let sessionTimerHandle = null;
+
+/* ════════════════════════════════════════════════════════════
+   НАВИГАЦИЯ
+   ════════════════════════════════════════════════════════════ */
 function showOnly(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-function showQuestion() { 
-  showOnly('question-screen'); 
+function enterSite() {
+  const start = document.getElementById('start-screen');
+  start.classList.add('leaving');
+  setTimeout(() => {
+    start.classList.remove('leaving');
+    showOnly('hub-screen');
+    startSessionTimer();
+  }, 480);
 }
 
-function goStart() { 
-  showOnly('start-screen'); 
+function goHub() { showOnly('hub-screen'); }
+
+function openGame(id) {
+  if (id === 'midost') showOnly('question-screen');
+}
+
+/* время на сайте — считаем, пока открыта вкладка на hub/игре */
+function startSessionTimer() {
+  if (sessionTimerHandle) return;
+  sessionTimerHandle = setInterval(() => {
+    stats.secondsOnSite += 1;
+    storeSet('midost_stats', stats);
+    renderStats();
+  }, 1000);
+}
+
+function renderStats() {
+  document.getElementById('stat-games').textContent = stats.gamesPlayed;
+  const s = stats.secondsOnSite;
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  const pad = n => String(n).padStart(2, '0');
+  document.getElementById('stat-time').textContent = h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`;
+}
+
+/* ════════════════════════════════════════════════════════════
+   ПРОФИЛЬ / АККАУНТ
+   ════════════════════════════════════════════════════════════ */
+function openProfile() {
+  document.getElementById('profile-modal').classList.add('active');
+  renderProfile();
+}
+function closeProfile() { document.getElementById('profile-modal').classList.remove('active'); }
+
+function renderProfile() {
+  const guestEl = document.getElementById('profile-guest');
+  const userEl = document.getElementById('profile-user');
+  const avatarBtn = document.getElementById('avatar-btn');
+
+  if (!user) {
+    guestEl.style.display = 'block';
+    userEl.style.display = 'none';
+    avatarBtn.innerHTML = '👤';
+    return;
+  }
+  guestEl.style.display = 'none';
+  userEl.style.display = 'flex';
+
+  document.getElementById('name-input').value = user.name || '';
+  document.getElementById('info-input').value = user.info || '';
+  const avBig = document.getElementById('profile-avatar-big');
+  avBig.innerHTML = user.avatar ? `<img src="${user.avatar}">` : '👤';
+  avatarBtn.innerHTML = user.avatar ? `<img src="${user.avatar}">` : '🙂';
+
+  renderStats();
+}
+
+function persistUser() { storeSet('midost_user', user); }
+
+function onNameInput() { user.name = document.getElementById('name-input').value; persistUser(); }
+function onInfoInput() { user.info = document.getElementById('info-input').value; persistUser(); }
+function onAvatarChange(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    user.avatar = reader.result; // data URL, base64
+    persistUser();
+    renderProfile();
+  };
+  reader.readAsDataURL(file);
+}
+
+function logout() {
+  user = null;
+  storeSet('midost_user', null);
+  renderProfile();
+}
+
+/* ── Демо-вход, работает без настройки Google Client ID ── */
+function demoLogin() {
+  user = { name: 'Игрок', email: 'demo@local', avatar: '', info: '' };
+  persistUser();
+  renderProfile();
+}
+
+/* ── Настоящий вход через Google Identity Services ──
+   1. Создайте OAuth Client ID: https://console.cloud.google.com/apis/credentials
+   2. Впишите его сюда:                                                     */
+const GOOGLE_CLIENT_ID = ''; // например: '123456789-abc.apps.googleusercontent.com'
+
+function initGoogleSignIn() {
+  if (!GOOGLE_CLIENT_ID || typeof google === 'undefined') return;
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleGoogleCredential
+  });
+  google.accounts.id.renderButton(
+    document.getElementById('g_signin_btn'),
+    { theme: 'filled_black', size: 'large', text: 'signin_with', shape: 'pill' }
+  );
+}
+
+function handleGoogleCredential(response) {
+  // Внимание: это разбор JWT только на клиенте, для реального продакшена
+  // токен нужно проверять на сервере, прежде чем доверять данным.
+  const payload = JSON.parse(atob(response.credential.split('.')[1]));
+  user = {
+    name: payload.name,
+    email: payload.email,
+    avatar: payload.picture,
+    info: user?.info || ''
+  };
+  persistUser();
+  closeProfile();
+  openProfile();
+}
+
+window.addEventListener('load', () => {
+  renderProfile();
+  // GSI-скрипт может загрузиться чуть позже — пробуем пару раз
+  let tries = 0;
+  const t = setInterval(() => {
+    tries++;
+    if (typeof google !== 'undefined' || tries > 20) {
+      clearInterval(t);
+      initGoogleSignIn();
+    }
+  }, 250);
+});
+
+/* ── Сохранение профиля в GitHub (Contents API) ──
+   Пишет в репозиторий, указанный в поле owner/repo, по путям:
+     profile/avatars/<email>.txt   (data URL картинки)
+     profile/names/<email>.txt
+     profile/info/<email>.json     (имя, инфо, статистика)          */
+async function githubPutFile(owner, repo, token, path, contentStr, message) {
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    'Accept': 'application/vnd.github+json'
+  };
+  let sha;
+  const existing = await fetch(url, { headers });
+  if (existing.ok) sha = (await existing.json()).sha;
+
+  const body = {
+    message,
+    content: btoa(unescape(encodeURIComponent(contentStr))),
+    ...(sha ? { sha } : {})
+  };
+  const res = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
+  if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+  return res.json();
+}
+
+async function saveProfileToGithub() {
+  const statusEl = document.getElementById('gh-status');
+  const repoField = document.getElementById('gh-repo').value.trim();
+  const token = document.getElementById('gh-token').value.trim();
+  if (!user || !user.email) { statusEl.textContent = 'Сначала войдите в аккаунт.'; return; }
+  if (!repoField.includes('/') || !token) { statusEl.textContent = 'Укажите owner/repo и токен.'; return; }
+  const [owner, repo] = repoField.split('/');
+  const safeId = user.email.replace(/[^a-zA-Z0-9]/g, '_');
+
+  statusEl.textContent = 'Сохраняю…';
+  try {
+    if (user.avatar) {
+      await githubPutFile(owner, repo, token, `profile/avatars/${safeId}.txt`, user.avatar, `Update avatar for ${safeId}`);
+    }
+    await githubPutFile(owner, repo, token, `profile/names/${safeId}.txt`, user.name || '', `Update name for ${safeId}`);
+    await githubPutFile(owner, repo, token, `profile/info/${safeId}.json`,
+      JSON.stringify({ name: user.name, info: user.info, stats }, null, 2),
+      `Update info for ${safeId}`);
+    statusEl.textContent = 'Готово ✔ сохранено в ' + repoField;
+  } catch (err) {
+    statusEl.textContent = 'Ошибка: ' + err.message;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   МИДОСТЬ — игра (логика из исходника, без изменений сути)
+   ════════════════════════════════════════════════════════════ */
+const MAX_SPIDERS = 1000;
+const SPIDER_GIFS = ['spider1.gif','spider2.gif','spider3.gif','spider4.gif','spider5.gif'];
+let chaosActive = false;
+let spiderEls = [];
+
+function playBrudaSound() {
+  const a = document.getElementById('bruda-sound');
+  if (!a) return;
+  a.volume = 0.6;
+  a.currentTime = 0;
+  a.play().catch(e => console.log("Audio error:", e));
+  return a;
+}
+function stopBrudaSound() {
+  const a = document.getElementById('bruda-sound');
+  if (a) { a.pause(); a.currentTime = 0; }
 }
 
 function pickHero(name) {
@@ -296,74 +640,59 @@ function pickHero(name) {
     const audio = playBrudaSound();
     startChaos(audio);
   } else {
-    showOnly('result-screen');
+    finishGame();
   }
 }
 
-// ── CHAOS ──────────────────────────────────────────────────────
+function finishGame() {
+  stats.gamesPlayed += 1;
+  storeSet('midost_stats', stats);
+  renderStats();
+  showOnly('result-screen');
+}
+
 function startChaos(audio) {
   chaosActive = true;
-  
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  
   const layer = document.getElementById('chaos-layer');
   layer.innerHTML = '';
   spiderEls = [];
   layer.classList.add('active');
 
-  // Длительность атаки = длительность звука
-  const attackDuration = audio.duration ? audio.duration * 1000 : 18000;
+  const attackDuration = (audio && audio.duration) ? audio.duration * 1000 : 18000;
 
-  // Быстрый начальный залп
-  for (let i = 0; i < 80; i++) {
-    setTimeout(() => spawnSpider(layer), i * 6);
-  }
+  for (let i = 0; i < 80; i++) setTimeout(() => spawnSpider(layer), i * 6);
 
-  const spawnInterval = 28; // очень агрессивно
-
+  const spawnInterval = 28;
   function spawnLoop() {
     if (!chaosActive || spiderEls.length >= MAX_SPIDERS) return;
     spawnSpider(layer);
     setTimeout(spawnLoop, spawnInterval);
   }
-
   spawnLoop();
 
-  // Перемешивание
-  const shuffleInterval = setInterval(() => {
-    if (!chaosActive) return;
-    randomisePositions();
-  }, 550);
-
-  // Завершаем вместе с окончанием звука
-  setTimeout(() => {
-    endChaos(shuffleInterval);
-  }, attackDuration);
+  const shuffleInterval = setInterval(() => { if (chaosActive) randomisePositions(); }, 550);
+  setTimeout(() => endChaos(shuffleInterval), attackDuration);
 }
 
 function spawnSpider(layer) {
   const size = 40 + Math.random() * 70;
-  
   const el = document.createElement('div');
   el.className = 'spider';
   el.style.width = size + 'px';
   el.style.height = size + 'px';
   el.style.left = Math.random() * (window.innerWidth - size) + 'px';
   el.style.top = Math.random() * (window.innerHeight - size) + 'px';
-  
   const img = document.createElement('img');
   img.src = SPIDER_GIFS[Math.floor(Math.random() * SPIDER_GIFS.length)];
-  img.alt = '';
-  img.draggable = false;
+  img.alt = ''; img.draggable = false;
   el.appendChild(img);
-  
   layer.appendChild(el);
   spiderEls.push(el);
 }
 
 function randomisePositions() {
   spiderEls = spiderEls.filter(el => el.isConnected);
-  
   spiderEls.forEach(el => {
     const w = parseFloat(el.style.width) || 60;
     const h = parseFloat(el.style.height) || 60;
@@ -375,9 +704,7 @@ function randomisePositions() {
 function endChaos(shuffleInterval) {
   chaosActive = false;
   clearInterval(shuffleInterval);
-  
   stopBrudaSound();
-  
   spiderEls.forEach((el, i) => {
     setTimeout(() => {
       el.style.transition = 'transform .45s, opacity .45s';
@@ -385,13 +712,12 @@ function endChaos(shuffleInterval) {
       el.style.opacity = '0';
     }, i * 10);
   });
-
   setTimeout(() => {
     const layer = document.getElementById('chaos-layer');
     layer.innerHTML = '';
     layer.classList.remove('active');
     spiderEls = [];
-    goStart();
+    finishGame();
   }, 2500);
 }
 </script>
